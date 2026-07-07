@@ -23,6 +23,7 @@
         <Button android:id="@+id/btnLive" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="En vivo" style="@style/Widget.Material3.Button.TonalButton" android:textSize="10sp"/>
         <Button android:id="@+id/btnCamera" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Foto" style="@style/Widget.Material3.Button.TonalButton" android:textSize="10sp"/>
         <Button android:id="@+id/btnGallery" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Galería" style="@style/Widget.Material3.Button.TonalButton" android:textSize="10sp"/>
+        <Button android:id="@+id/btnTogglePoints" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Puntos Off" style="@style/Widget.Material3.Button.TonalButton" android:textSize="10sp"/>
     </LinearLayout>
 
     <FrameLayout
@@ -33,6 +34,11 @@
 
         <androidx.camera.view.PreviewView
             android:id="@+id/previewView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ImageView
+            android:id="@+id/canvasOverlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 

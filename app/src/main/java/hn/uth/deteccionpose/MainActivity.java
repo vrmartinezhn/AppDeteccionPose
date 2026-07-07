@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,6 +32,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+
 public class MainActivity extends AppCompatActivity {
 
     private PreviewView previewView;
@@ -38,6 +42,30 @@ public class MainActivity extends AppCompatActivity {
     private TextView txtStatus, txtData;
     private PoseDetector poseDetector;
     private Executor executor = Executors.newSingleThreadExecutor();
+    private ImageView canvasOverlay;
+    private boolean showPoints = false;
+    private PoseGraphic poseGraphic = new PoseGraphic();
+
+    // Variables para suavizado (Filtro)
+    private float smoothDiffY = 0;
+    private final float alpha = 0.4f; // Factor de suavizado (0.1 a 0.3 es ideal)
+
+    private ProcessCameraProvider cameraProvider;
+
+    // Para la Galería
+    private final androidx.activity.result.ActivityResultLauncher<String> mGetContent = registerForActivityResult(
+            new androidx.activity.result.contract.ActivityResultContracts.GetContent(),
+            uri -> {
+                if (uri != null) { processStaticImage(uri); }
+            });
+
+    // Para Tomar Foto
+    private final androidx.activity.result.ActivityResultLauncher<Void> mTakePicture = registerForActivityResult(
+            new androidx.activity.result.contract.ActivityResultContracts.TakePicturePreview(),
+            bitmap -> {
+                if (bitmap != null) { processBitmap(bitmap); }
+            });
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +77,8 @@ public class MainActivity extends AppCompatActivity {
         imageDisplay = findViewById(R.id.imageDisplay);
         txtStatus = findViewById(R.id.txtStatus);
         txtData = findViewById(R.id.txtData);
+        canvasOverlay = findViewById(R.id.canvasOverlay);
+        Button btnTogglePoints = findViewById(R.id.btnTogglePoints);
 
         // 1. Configurar ML Kit Pose Detector
         PoseDetectorOptions options = new PoseDetectorOptions.Builder()
@@ -56,16 +86,24 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         poseDetector = PoseDetection.getClient(options);
 
+        btnTogglePoints.setOnClickListener(v -> {
+            showPoints = !showPoints;
+            btnTogglePoints.setText(showPoints ? "Puntos ON" : "Puntos OFF");
+            if (!showPoints) canvasOverlay.setImageDrawable(null);
+        });
+
         // Botón En Vivo
         findViewById(R.id.btnLive).setOnClickListener(v -> {
             imageDisplay.setVisibility(View.GONE);
             previewView.setVisibility(View.VISIBLE);
-            checkPermissionsAndStartCamera();
+            startCamera(); // Esto vuelve a encender el flujo
         });
 
-        // Botones de Foto y Galería (Pendientes de implementar lógica de captura)
-        findViewById(R.id.btnCamera).setOnClickListener(v -> Toast.makeText(this, "Función de foto", Toast.LENGTH_SHORT).show());
-        findViewById(R.id.btnGallery).setOnClickListener(v -> Toast.makeText(this, "Función de galería", Toast.LENGTH_SHORT).show());
+        // Botón Tomar Foto
+        findViewById(R.id.btnCamera).setOnClickListener(v -> mTakePicture.launch(null));
+
+        // Botón Subir Foto de Galería
+        findViewById(R.id.btnGallery).setOnClickListener(v -> mGetContent.launch("image/*"));
     }
 
     private void checkPermissionsAndStartCamera() {
@@ -81,7 +119,8 @@ public class MainActivity extends AppCompatActivity {
 
         cameraProviderFuture.addListener(() -> {
             try {
-                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                // Guardamos la instancia globalmente
+                cameraProvider = cameraProviderFuture.get();
 
                 Preview preview = new Preview.Builder().build();
                 preview.setSurfaceProvider(previewView.getSurfaceProvider());
@@ -107,31 +146,40 @@ public class MainActivity extends AppCompatActivity {
             }
         }, ContextCompat.getMainExecutor(this));
     }
-
     private void analyzePose(Pose pose) {
         if (pose.getAllPoseLandmarks().isEmpty()) {
-            runOnUiThread(() -> txtStatus.setText("No se detecta a nadie"));
+            runOnUiThread(() -> {
+                txtStatus.setText("No se detecta a nadie");
+                canvasOverlay.setImageDrawable(null);
+            });
             return;
         }
 
-        // Obtener hombro y oreja para detectar postura "cusca"
+        // DIBUJAR PUNTOS si está activado
+        if (showPoints) {
+            drawPoseOnCanvas(pose);
+        }
+
         PoseLandmark leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER);
         PoseLandmark leftEar = pose.getPoseLandmark(PoseLandmark.LEFT_EAR);
 
         if (leftShoulder != null && leftEar != null) {
-            // Calculamos la distancia vertical entre la oreja y el hombro
-            float diffY = Math.abs(leftShoulder.getPosition().y - leftEar.getPosition().y);
+            float currentDiffY = Math.abs(leftShoulder.getPosition().y - leftEar.getPosition().y);
 
-            StringBuilder sb = new StringBuilder();
-            sb.append("DATOS ML KIT:\n");
-            sb.append("Hombro Y: ").append((int)leftShoulder.getPosition().y).append("\n");
-            sb.append("Oreja Y: ").append((int)leftEar.getPosition().y).append("\n");
-            sb.append("Diferencia: ").append((int)diffY);
+            // APLICAR FILTRO PASA-BAJOS (Suavizado)
+            // Esto evita el parpadeo constante
+            smoothDiffY = (alpha * currentDiffY) + (1.0f - alpha) * smoothDiffY;
 
             runOnUiThread(() -> {
+                StringBuilder sb = new StringBuilder();
+                sb.append("Puntos detectados: ").append(pose.getAllPoseLandmarks().size()).append("\n");
+                sb.append("Hombro Izq (Y): ").append((int) leftShoulder.getPosition().y).append("\n");
+                sb.append("Oreja Izq (Y): ").append((int) leftEar.getPosition().y).append("\n");
+                sb.append("Diferencia Suavizada: ").append((int) smoothDiffY);
                 txtData.setText(sb.toString());
-                // Si la oreja está muy cerca del hombro en el eje Y, significa que la cabeza está caída/hacia adelante
-                if (diffY > 120) {
+
+                // Usamos el valor suavizado para la decisión
+                if (smoothDiffY > 110) { // Ajusta este valor según tus pruebas
                     txtStatus.setText("¡Postura Correcta! :)");
                     txtStatus.setTextColor(Color.GREEN);
                 } else {
@@ -141,4 +189,65 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+
+    private void drawPoseOnCanvas(Pose pose) {
+        if (canvasOverlay.getWidth() == 0 || canvasOverlay.getHeight() == 0) return;
+
+        Bitmap bitmap = Bitmap.createBitmap(canvasOverlay.getWidth(), canvasOverlay.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+
+        // IMPORTANTE: ML Kit en modo STREAM suele procesar a 480x640.
+        // Para que los puntos sean exactos, usamos las dimensiones de la vista.
+        // Si los puntos se mueven al revés, invertimos el eje X en el PoseGraphic.
+        poseGraphic.draw(canvas, pose, canvasOverlay.getWidth(), canvasOverlay.getHeight(), true);
+
+        runOnUiThread(() -> canvasOverlay.setImageBitmap(bitmap));
+    }
+
+    private void processStaticImage(android.net.Uri uri) {
+        try {
+            android.graphics.ImageDecoder.Source source = android.graphics.ImageDecoder.createSource(this.getContentResolver(), uri);
+            Bitmap bitmap = android.graphics.ImageDecoder.decodeBitmap(source);
+            processBitmap(bitmap);
+        } catch (Exception e) {
+            Toast.makeText(this, "Error al cargar imagen", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void processBitmap(Bitmap bitmap) {
+        stopCamera(); // Detiene el flujo de video
+
+        // Preparar UI
+        previewView.setVisibility(View.GONE);
+        imageDisplay.setVisibility(View.VISIBLE);
+        imageDisplay.setImageBitmap(bitmap);
+        canvasOverlay.setImageDrawable(null); // Limpiar puntos viejos
+
+        // Procesar con ML Kit
+        InputImage image = InputImage.fromBitmap(bitmap, 0);
+        poseDetector.process(image)
+                .addOnSuccessListener(pose -> {
+                    analyzePose(pose); // Reutilizamos tu lógica de análisis
+                    if (showPoints) {
+                        // En fotos estáticas (galería/cámara) no invertimos el eje X (false)
+                        drawPoseOnCanvasStatic(pose);
+                    }
+                });
+    }
+
+    // Metodo especial para dibujar en fotos fijas sin efecto espejo
+    private void drawPoseOnCanvasStatic(Pose pose) {
+        Bitmap bitmap = Bitmap.createBitmap(canvasOverlay.getWidth(), canvasOverlay.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        poseGraphic.draw(canvas, pose, canvasOverlay.getWidth(), canvasOverlay.getHeight(), false);
+        runOnUiThread(() -> canvasOverlay.setImageBitmap(bitmap));
+    }
+
+    private void stopCamera() {
+        if (cameraProvider != null) {
+            cameraProvider.unbindAll(); // Esto detiene el flujo de la cámara y el análisis
+        }
+    }
+
+
 }
