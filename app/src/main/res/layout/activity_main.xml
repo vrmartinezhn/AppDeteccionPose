@@ -4,19 +4,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="30dp">
+    android:background="@color/background"
+    android:paddingTop="48dp">
 
     <!-- Header -->
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="Detector de Postura"
-        android:textAlignment="center"
-        android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
-        android:textColor="#6200EE" />
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Detector de Postura"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="match_parent"
@@ -33,43 +41,49 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        app:layout_constraintTop_toBottomOf="@id/header">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLive"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="En vivo"
-            android:textSize="10sp" />
+            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_margin="6dp"
+            app:icon="@android:drawable/ic_menu_camera"
+            app:iconSize="24dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCamera"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Foto"
-            android:textSize="10sp" />
+            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_margin="6dp"
+            app:icon="@android:drawable/ic_menu_add"
+            app:iconSize="24dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGallery"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Galería"
-            android:textSize="10sp" />
+            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_margin="6dp"
+            app:icon="@android:drawable/ic_menu_gallery"
+            app:iconSize="24dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnTogglePoints"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Puntos Off"
-            android:textSize="10sp" />
+            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_margin="6dp"
+            android:text="OFF"
+            android:textSize="10sp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
     </LinearLayout>
 
     <!-- Contenedor de Cámara/Imagen -->
@@ -86,52 +100,102 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="#1A1A1A">
+
+            <androidx.camera.view.PreviewView
+                android:id="@+id/previewView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <ImageView
+                android:id="@+id/imageDisplay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/canvasOverlay"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
-        </androidx.camera.view.PreviewView>
 
-        <ImageView
-            android:id="@+id/imageDisplay"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="fitCenter"
-            android:visibility="gone" />
-
-        <!-- Ventana flotante de estado -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|center_horizontal"
-            android:layout_margin="8dp"
-            app:cardBackgroundColor="#D0E4FF">
-
+            <!-- Badge de Estado flotante -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
-                android:text="Esperando detección..."
-                android:textStyle="bold" />
-        </com.google.android.material.card.MaterialCardView>
-    </FrameLayout>
+                android:layout_gravity="top|center_horizontal"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/rounded_badge"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="4dp"
+                android:text="Analizando..."
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+        </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- Panel de Estado inferior -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/statusCard"
         android:layout_width="match_parent"
-        android:layout_height="238dp"
-        android:layout_marginTop="8dp">
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/surface"
+        app:cardCornerRadius="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Large">
 
-        <TextView
-            android:id="@+id/txtData"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="monospace"
-            android:text="Datos de ML Kit aparecerán aquí..."
-            android:textSize="12sp" />
-    </ScrollView>
+            android:orientation="vertical"
+            android:padding="28dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Estado de postura"
+                android:textColor="#A0A0A0"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/txtStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Esperando detección..."
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="20dp"
+                android:background="#20FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Datos de ML Kit"
+                android:textColor="#A0A0A0"
+                android:textSize="14sp" />
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_marginTop="10dp">
+
+                <TextView
+                    android:id="@+id/txtData"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:text="Aparecerán aquí los datos..."
+                    android:textColor="#D0D0D0"
+                    android:textSize="13sp" />
+            </ScrollView>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
