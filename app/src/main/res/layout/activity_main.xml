@@ -4,26 +4,58 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="30dp">
 
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
         android:text="Detector de Postura"
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
-        android:textColor="#6200EE"
-        android:layout_marginBottom="16dp"/>
+        android:textColor="#6200EE" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
-        <Button android:id="@+id/btnLive" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="En vivo" style="@style/Widget.Material3.Button.TonalButton" android:textSize="10sp"/>
-        <Button android:id="@+id/btnCamera" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Foto" style="@style/Widget.Material3.Button.TonalButton" android:textSize="10sp"/>
-        <Button android:id="@+id/btnGallery" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Galería" style="@style/Widget.Material3.Button.TonalButton" android:textSize="10sp"/>
-        <Button android:id="@+id/btnTogglePoints" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Puntos Off" style="@style/Widget.Material3.Button.TonalButton" android:textSize="10sp"/>
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnLive"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="En vivo"
+            android:textSize="10sp" />
+
+        <Button
+            android:id="@+id/btnCamera"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Foto"
+            android:textSize="10sp" />
+
+        <Button
+            android:id="@+id/btnGallery"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Galería"
+            android:textSize="10sp" />
+
+        <Button
+            android:id="@+id/btnTogglePoints"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Puntos Off"
+            android:textSize="10sp" />
     </LinearLayout>
 
     <FrameLayout
@@ -35,19 +67,20 @@
         <androidx.camera.view.PreviewView
             android:id="@+id/previewView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/canvasOverlay"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            <ImageView
+                android:id="@+id/canvasOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </androidx.camera.view.PreviewView>
 
         <ImageView
             android:id="@+id/imageDisplay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
-            android:scaleType="fitCenter"/>
+            android:scaleType="fitCenter"
+            android:visibility="gone" />
 
         <!-- Ventana flotante de estado -->
         <com.google.android.material.card.MaterialCardView
@@ -56,27 +89,29 @@
             android:layout_gravity="top|center_horizontal"
             android:layout_margin="8dp"
             app:cardBackgroundColor="#D0E4FF">
+
             <TextView
                 android:id="@+id/txtStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
                 android:text="Esperando detección..."
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
         </com.google.android.material.card.MaterialCardView>
     </FrameLayout>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="238dp"
         android:layout_marginTop="8dp">
+
         <TextView
             android:id="@+id/txtData"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Datos de ML Kit aparecerán aquí..."
             android:fontFamily="monospace"
-            android:textSize="12sp"/>
+            android:text="Datos de ML Kit aparecerán aquí..."
+            android:textSize="12sp" />
     </ScrollView>
 
 </LinearLayout>
