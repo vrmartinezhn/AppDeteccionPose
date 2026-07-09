@@ -2,4 +2,17 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Modern Palette -->
+    <color name="primary">#673AB7</color>
+    <color name="primaryDark">#512DA8</color>
+    <color name="accent">#00BCD4</color>
+    <color name="background">#0F0F1E</color>
+    <color name="surface">#1E1E2E</color>
+    <color name="onSurface">#FFFFFF</color>
+    <color name="cardBackground">#2A2A3D</color>
+
+    <!-- Status colors -->
+    <color name="correct_green">#4CAF50</color>
+    <color name="wrong_red">#F44336</color>
 </resources>
