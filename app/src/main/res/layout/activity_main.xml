@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
     android:paddingTop="48dp">
 
-    <!-- Header -->
-    <LinearLayout
-        android:id="@+id/header"
+    <com.google.android.material.textview.MaterialTextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -26,18 +23,7 @@
             android:textSize="24sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Inteligencia Artificial para tu bienestar"
-            android:textAlignment="center"
-            android:textColor="#A0A0A0"
-            android:textSize="14sp" />
-    </LinearLayout>
-
-    <!-- Botonera Horizontal -->
     <LinearLayout
-        android:id="@+id/buttonRow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -86,19 +72,14 @@
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
     </LinearLayout>
 
-    <!-- Contenedor de Cámara/Imagen -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cameraCard"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_margin="20dp"
-        app:cardCornerRadius="28dp"
-        app:cardElevation="12dp"
-        app:layout_constraintBottom_toTopOf="@id/statusCard"
-        app:layout_constraintTop_toBottomOf="@id/buttonRow"
-        app:strokeWidth="0dp">
+        android:layout_height="300dp"
+        android:layout_marginTop="16dp"
+        android:background="#E0E0E0">
 
-        <FrameLayout
+        <androidx.camera.view.PreviewView
+            android:id="@+id/previewView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#1A1A1A">
@@ -122,6 +103,7 @@
 
             <!-- Badge de Estado flotante -->
             <TextView
+                android:id="@+id/txtStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|center_horizontal"
@@ -135,9 +117,7 @@
         </FrameLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Panel de Estado inferior -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/statusCard"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardBackgroundColor="@color/surface"
@@ -198,4 +178,4 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
