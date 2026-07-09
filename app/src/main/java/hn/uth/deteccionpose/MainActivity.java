@@ -146,7 +146,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }, ContextCompat.getMainExecutor(this));
     }
+    private AnalizadorPosturasAvanzado analizador = new AnalizadorPosturasAvanzado();
+
     private void analyzePose(Pose pose) {
+
         if (pose.getAllPoseLandmarks().isEmpty()) {
             runOnUiThread(() -> {
                 txtStatus.setText("No se detecta a nadie");
@@ -155,39 +158,24 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // DIBUJAR PUNTOS si está activado
         if (showPoints) {
             drawPoseOnCanvas(pose);
         }
 
-        PoseLandmark leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER);
-        PoseLandmark leftEar = pose.getPoseLandmark(PoseLandmark.LEFT_EAR);
+        boolean malaPostura = analizador.malaPostura(pose);
 
-        if (leftShoulder != null && leftEar != null) {
-            float currentDiffY = Math.abs(leftShoulder.getPosition().y - leftEar.getPosition().y);
+        runOnUiThread(() -> {
 
-            // APLICAR FILTRO PASA-BAJOS (Suavizado)
-            // Esto evita el parpadeo constante
-            smoothDiffY = (alpha * currentDiffY) + (1.0f - alpha) * smoothDiffY;
+            txtData.setText("Puntos detectados: " + pose.getAllPoseLandmarks().size());
 
-            runOnUiThread(() -> {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Puntos detectados: ").append(pose.getAllPoseLandmarks().size()).append("\n");
-                sb.append("Hombro Izq (Y): ").append((int) leftShoulder.getPosition().y).append("\n");
-                sb.append("Oreja Izq (Y): ").append((int) leftEar.getPosition().y).append("\n");
-                sb.append("Diferencia Suavizada: ").append((int) smoothDiffY);
-                txtData.setText(sb.toString());
-
-                // Usamos el valor suavizado para la decisión
-                if (smoothDiffY > 110) { // Ajusta este valor según tus pruebas
-                    txtStatus.setText("¡Postura Correcta! :)");
-                    txtStatus.setTextColor(Color.GREEN);
-                } else {
-                    txtStatus.setText("Por favor corrige tu postura :(");
-                    txtStatus.setTextColor(Color.RED);
-                }
-            });
-        }
+            if (!malaPostura) {
+                txtStatus.setText("¡Postura Correcta! 😊");
+                txtStatus.setTextColor(Color.GREEN);
+            } else {
+                txtStatus.setText("Corrige tu postura ⚠️");
+                txtStatus.setTextColor(Color.RED);
+            }
+        });
     }
 
     private void drawPoseOnCanvas(Pose pose) {
