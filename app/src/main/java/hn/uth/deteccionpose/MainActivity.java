@@ -72,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        checkPermissionsAndStartCamera();
+
         // Inicializar vistas
         previewView = findViewById(R.id.previewView);
         imageDisplay = findViewById(R.id.imageDisplay);

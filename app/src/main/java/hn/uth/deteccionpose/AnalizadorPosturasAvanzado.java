@@ -5,12 +5,16 @@ import com.google.mlkit.vision.pose.PoseLandmark;
 
 public class AnalizadorPosturasAvanzado {
 
+
+    //Este metodo me valida si detecta un punto
+    //debe validar que el punto (lm) exista y tambien que sea 70 % de confianza
     private boolean valido(PoseLandmark lm){
         return lm != null && lm.getInFrameLikelihood() > 0.7;
     }
 
     // =========================
     // CUELLO ADELANTADO
+
     // =========================
     public boolean cuello(Pose pose){
         PoseLandmark nariz = pose.getPoseLandmark(PoseLandmark.NOSE);
@@ -48,12 +52,12 @@ public class AnalizadorPosturasAvanzado {
 
         if (!valido(izq) || !valido(der)) return false;
 
-        float diffY = Math.abs(izq.getPosition().y - der.getPosition().y);
-        float ancho = Math.abs(izq.getPosition().x - der.getPosition().x);
+        float caidaHombro = Math.abs(izq.getPosition().y - der.getPosition().y);
+        float distanciaHombros = Math.abs(izq.getPosition().x - der.getPosition().x);
 
-        float ratio = diffY / ancho;
+        float porcentajeInclinacion = caidaHombro / distanciaHombros;
 
-        return ratio > 0.08f; // NORMALIZADO
+        return porcentajeInclinacion > 0.08f; // NORMALIZADO
     }
 
     // =========================
