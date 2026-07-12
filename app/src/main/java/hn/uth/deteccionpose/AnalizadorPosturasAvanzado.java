@@ -16,31 +16,31 @@ public class AnalizadorPosturasAvanzado {
     // CUELLO ADELANTADO
 
     // =========================
-    public boolean cuello(Pose pose){
-        PoseLandmark nariz = pose.getPoseLandmark(PoseLandmark.NOSE);
-        PoseLandmark hombroIzq = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER);
-        PoseLandmark hombroDer = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER);
+        public boolean cuello(Pose pose){
+            PoseLandmark nariz = pose.getPoseLandmark(PoseLandmark.NOSE);
+            PoseLandmark hombroIzq = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER);
+            PoseLandmark hombroDer = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER);
 
-        if (!valido(nariz) || (!valido(hombroIzq) && !valido(hombroDer)))
-            return false;
+            if (!valido(nariz) || (!valido(hombroIzq) && !valido(hombroDer)))
+                return false;
 
-        float hombroX, hombroY;
+            float hombroX, hombroY;
 
-        if (valido(hombroIzq) && valido(hombroDer)) {
-            hombroX = (hombroIzq.getPosition().x + hombroDer.getPosition().x) / 2f;
-            hombroY = (hombroIzq.getPosition().y + hombroDer.getPosition().y) / 2f;
-        } else {
-            PoseLandmark ref = valido(hombroIzq) ? hombroIzq : hombroDer;
-            hombroX = ref.getPosition().x;
-            hombroY = ref.getPosition().y;
-        }
+            if (valido(hombroIzq) && valido(hombroDer)) {
+                hombroX = (hombroIzq.getPosition().x + hombroDer.getPosition().x) / 2f;
+                hombroY = (hombroIzq.getPosition().y + hombroDer.getPosition().y) / 2f;
+            } else {
+                PoseLandmark ref = valido(hombroIzq) ? hombroIzq : hombroDer;
+                hombroX = ref.getPosition().x;
+                hombroY = ref.getPosition().y;
+            }
 
-        float dx = nariz.getPosition().x - hombroX;
-        float dy = nariz.getPosition().y - hombroY;
+            float dx = nariz.getPosition().x - hombroX;
+            float dy = nariz.getPosition().y - hombroY;
 
-        double angulo = Math.toDegrees(Math.atan2(dx, -dy));
+            double angulo = Math.toDegrees(Math.atan2(dx, -dy));
 
-        return Math.abs(angulo) > 12; // MÁS SENSIBLE
+            return Math.abs(angulo) > 12; // MÁS SENSIBLE
     }
 
     // =========================
