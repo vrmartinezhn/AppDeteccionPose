@@ -45,11 +45,13 @@ public class PoseGraphic {
 
 
 
-    public void draw(Canvas canvas, Pose pose, int viewWidth, int viewHeight, boolean mirror){
+    public void draw(Canvas canvas, Pose pose, int viewWidth, int viewHeight, float imageWidth, float imageHeight, boolean mirror){
 
-        // Tamaño REAL del input de ML Kit (aprox en STREAM_MODE)
-        float imageWidth = 480f;
-        float imageHeight = 640f;
+        // Si por alguna razón la imagen tiene dimensiones inválidas, evitamos división por cero
+        if (imageWidth <= 0 || imageHeight <= 0) {
+            imageWidth = 480f;
+            imageHeight = 640f;
+        }
 
         float scaleX = viewWidth / imageWidth;
         float scaleY = viewHeight / imageHeight;

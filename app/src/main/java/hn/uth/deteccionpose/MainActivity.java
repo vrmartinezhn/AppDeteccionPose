@@ -37,9 +37,10 @@ import java.util.concurrent.Executors;
  *
  * APIs que se usan aquí:
  * - CameraX (androidx.camera.*): maneja el ciclo de vida de la cámara sin que tengamos
- *   que lidiar manualmente con Camera2. Usamos 3 piezas: ProcessCameraProvider (obtiene
+ *   que lidiar manualmente con Camera2. Usamos 3 piezas: Proce2ssCameraProvider (obtiene
  *   y controla la cámara), Preview (muestra el video en pantalla) e ImageAnalysis
- *   (nos entrega cada frame para procesarlo, en este caso con ML Kit).
+ *   (nos entrega cada frame para procesarlo,
+ *   en este caso con ML Kit).
  * - ML Kit Pose Detection (com.google.mlkit.vision.pose.*): detecta los puntos del
  *   cuerpo (landmarks) en cada frame o imagen estática.
  * - Activity Result API (androidx.activity.result.*): forma moderna de pedir permisos
@@ -159,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     /**
      * Arranca CameraX: obtiene el proveedor de cámara, configura la vista previa (Preview)
      * y el análisis de frames (ImageAnalysis), y los "ata" al ciclo de vida de la Activity
@@ -244,15 +246,21 @@ public class MainActivity extends AppCompatActivity {
 
         Bitmap bitmap = Bitmap.createBitmap(canvasOverlay.getWidth(), canvasOverlay.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        poseGraphic.draw(canvas, pose, canvasOverlay.getWidth(), canvasOverlay.getHeight(), true);
+        poseGraphic.draw(canvas, pose, canvasOverlay.getWidth(), canvasOverlay.getHeight(), 480f, 640f,true);
         runOnUiThread(() -> canvasOverlay.setImageBitmap(bitmap));
     }
 
     /** Dibuja el esqueleto para fotos estáticas (sin espejo) */
-    private void drawPoseOnCanvasStatic(Pose pose) {
+    private void drawPoseOnCanvasStatic(Pose pose, Bitmap originalBitmap) {
+
+        if (canvasOverlay.getWidth() == 0 || canvasOverlay.getHeight() == 0 || originalBitmap == null) return;
+
         Bitmap bitmap = Bitmap.createBitmap(canvasOverlay.getWidth(), canvasOverlay.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        poseGraphic.draw(canvas, pose, canvasOverlay.getWidth(), canvasOverlay.getHeight(), false);
+
+        float imgWidth = originalBitmap.getWidth();
+        float imgHeight = originalBitmap.getHeight();
+        poseGraphic.draw(canvas, pose, canvasOverlay.getWidth(), canvasOverlay.getHeight(), imgWidth, imgHeight, false);
         runOnUiThread(() -> canvasOverlay.setImageBitmap(bitmap));
     }
 
@@ -282,8 +290,8 @@ public class MainActivity extends AppCompatActivity {
                 .addOnSuccessListener(pose -> {
                     analyzePose(pose);
                     if (showPoints) {
-                        // en fotos fijas no hay espejo, por eso "false"
-                        drawPoseOnCanvasStatic(pose);
+
+                        drawPoseOnCanvasStatic(pose, bitmap);
                     }
                 });
     }
